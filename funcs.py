@@ -2,18 +2,6 @@ from PIL import Image
 import numpy as np
 import cmath
 
-def checkIfDuplicates(listOfElems):
-    """
-    Check if given list contains any duplicates
-    """
-    setOfElems = set()
-    for elem in listOfElems:
-        if elem in setOfElems:
-            return True
-        else:
-            setOfElems.add(elem)         
-    return False
-
 def makeOutputCanvas(width_resolution = 1000, height_resolution = 1000, depth = "", dtype = float, round = 6): #or dtype complex
     """
     Returns an empty np array of the correct depth for a gresycale or rgb image.
