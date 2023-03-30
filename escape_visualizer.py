@@ -1,6 +1,7 @@
 # Imports # -------------------------------------------------------------------
 from typing import Callable, Literal
-from itertools import cycle
+from itertools import cycle, islice
+from more_itertools import iterate
 import numpy as np
 
 
@@ -43,7 +44,7 @@ def is_k_periodic(lst: list, k: int) -> bool: #FIXME I think this is wrong, but 
     if len(lst) < k // 2:
         return False
 
-    return np.array(x == y for x, y in zip(lst, cycle(lst[:k]))).all()
+    return all(x == y for x, y in zip(lst, cycle(lst[:k])))
 
 
 def shift_coords(coord: tuple[int, int], real_topleft: tuple[int, int],
@@ -80,34 +81,40 @@ def escape_code(func: Callable, code: int, iterations: int,
     if info_requested == "p_num":
         p_num = 0
 
-        while p_num := p_num + 1:
+        while (p_num := p_num + 1) < iterations:
             real_coords = func(real_coords)
 
             if max(abs(real_coords[0]), abs(real_coords[1])) >= escape_thresh:
                 return p_num
 
-            if p_num > iterations:
-                return 0
+        return 0
 
     if info_requested == "slope":
         p_num = 0
         previous = (0, 0)
         current = real_coords
 
-        while max(abs(current[0]), abs(current[1])) <= escape_thresh \
-              and (p_num := p_num + 1):
+        while max(abs(current[0]), abs(current[1])) <= escape_thresh:
+            p_num += 1
 
             if p_num > iterations:
                 return 0
 
-            previous, current = current, func(real_coords)
+            previous = current
+            current = func(current)
 
-        y_change = current[0] / previous[0]
-        x_change = current[1] / previous[1]
-        return y_change / x_change
+        y_change = current[0] - previous[0]
+        x_change = current[1] - previous[1]
+        return round(y_change / x_change, 2)
 
     if info_requested == "period":
-        raise NotImplementedError # FIXME
+        history = list(islice(iterate(func, real_coords), iterations))
+
+        for k in range(1, iterations // 2):
+            if is_k_periodic(history, k):
+                return k
+
+        return 0
 
 
 def escape_board(func: Callable, board: np.ndarray, iterations: int,
