@@ -42,6 +42,7 @@ def is_k_periodic(lst: list, k: int) -> bool: #FIXME I think this is wrong, but 
     """Detects if the list is k-periodic."""
     if len(lst) < k // 2:
         return False
+    
     return np.array(x == y for x, y in zip(lst, cycle(lst[:k]))).all()
 
 
