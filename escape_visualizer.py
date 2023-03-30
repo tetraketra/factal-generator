@@ -42,7 +42,7 @@ def is_k_periodic(lst: list, k: int) -> bool: #FIXME I think this is wrong, but 
     """Detects if the list is k-periodic."""
     if len(lst) < k // 2:
         return False
-    
+
     return np.array(x == y for x, y in zip(lst, cycle(lst[:k]))).all()
 
 
@@ -53,9 +53,9 @@ def shift_coords(coord: tuple[int, int], real_topleft: tuple[int, int],
     return coord #TODO
 
 
-def get_escape_info(func: Callable, code: int, iterations: int,
+def escape_code(func: Callable, code: int, iterations: int,
                     escape_thresh: float, side_length: int,
-                    info_requested: Literal["point",
+                    info_requested: Literal["p_num",
                     "slope", "period"]) -> int:
     """
     Apply a function to a p_num in 2d space until it escapes, then return info.
@@ -83,7 +83,7 @@ def get_escape_info(func: Callable, code: int, iterations: int,
         while p_num := p_num + 1:
             real_coords = func(real_coords)
 
-            if max(abs(real_coords[0]), abs(real_coords[1])) > escape_thresh:
+            if max(abs(real_coords[0]), abs(real_coords[1])) >= escape_thresh:
                 return p_num
 
             if p_num > iterations:
@@ -91,7 +91,7 @@ def get_escape_info(func: Callable, code: int, iterations: int,
 
     if info_requested == "slope":
         p_num = 0
-        previous = (0, 0) 
+        previous = (0, 0)
         current = real_coords
 
         while max(abs(current[0]), abs(current[1])) <= escape_thresh \
@@ -108,6 +108,20 @@ def get_escape_info(func: Callable, code: int, iterations: int,
 
     if info_requested == "period":
         raise NotImplementedError # FIXME
+
+
+def escape_board(func: Callable, board: np.ndarray, iterations: int,
+                 escape_thresh: float, side_length: int,
+                 info_requested: Literal["p_num",
+                 "slope", "period"]) -> np.ndarray:
+    """
+    Applies `escape_from_code()` to an entire board with the 
+    supplied arguments. See `escape_from_code()` for what 
+    these arguments do.
+    """
+    return np.vectorize(lambda code: escape_code(func, code,
+                        iterations, escape_thresh, side_length,
+                        info_requested))(board)
 
 # Private Functions # ---------------------------------------------------------
 # TODO
