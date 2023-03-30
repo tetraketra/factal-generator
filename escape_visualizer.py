@@ -82,16 +82,18 @@ def get_escape_info(func: Callable, code: int, iterations: int,
         while p_num := p_num + 1:
             real_coords = func(real_coords)
 
-            if max(abs(real_coords[0], real_coords[1])) > escape_thresh:
+            if max(abs(real_coords[0]), abs(real_coords[1])) > escape_thresh:
                 return p_num
 
             if p_num > iterations:
                 return 0
 
     if info_requested == "slope":
-        p_num, previous, current = 0, (0,0), real_coords
+        p_num = 0
+        previous = (0, 0) 
+        current = real_coords
 
-        while abs(max(current[0], current[1])) <= escape_thresh \
+        while max(abs(current[0]), abs(current[1])) <= escape_thresh \
               and (p_num := p_num + 1):
 
             if p_num > iterations:
